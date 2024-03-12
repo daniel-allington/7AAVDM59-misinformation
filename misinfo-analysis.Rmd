@@ -2,7 +2,9 @@
 title: "Analysis of coronavirus misinformation beliefs"
 author: "Daniel Allington"
 date: "2024-03-07"
-output: html_document
+output:
+  html_document: default
+  word_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -12,9 +14,19 @@ library(dplyr)
 library(readr)
 library(ggplot2)
 
+options(scipen = 999)
+
 misinfo_d <- read_csv('../data/life-under-lockdown-wave2-extract.csv')
 ```
 
+# Association of number of misinformation beliefs with gender
+## Hypothesis
+It was hypothesised that number of misinformation beliefs would be associated with gender.
+
+## Methodology
+Welch's t-test was used to compare mean numbers of misinformation beliefs for respondents identifying as male and respondents identifying as female. The small minority of respondents identifying in another way were excluded from this analysis.
+
+## Findings
 ```{r}
 misinfo_d %>%
   ggplot(aes(x = gender)) +
@@ -39,3 +51,57 @@ misinfo_d %>%
 
 In the sample, males had more misinformation beliefs (M = 0.73) than females (M = 0.61), but this was not statistically significant, t(494.31) = -1.201, p = 0.230.
 
+# Association of number of misinformation beliefs with age
+## Hypothesis
+It was hypothesised that number of misinformation beliefs would be positively associated with age.
+
+## Methodology
+The product-moment (or Pearson) coefficient of correlation between number of misinformation beliefs and age was calculated.
+
+## Findings
+```{r}
+misinfo_d %>%
+  ggplot(aes(x = age, y = beliefs)) +
+  geom_jitter()
+```
+
+```{r}
+misinfo_d %>%
+  cor.test(
+    formula = ~ beliefs + age,
+    data = .,
+    method = 'pearson'
+  )
+```
+
+There was a statistically significant moderate negative correlation between number of misinformation beliefs and age, r(498) = -.24, p < .001. This appears to be accounted for by the very small number of older people with high numbers of misinformation beliefs. Across all ages, the bulk of respondents had few or none, but the respondents with high numbers of misinformation beliefs were almost all relatively young.
+
+# Association of number of misinformation beliefs with amount of knowledge gathered from Facebook
+## Hypothesis
+It was hypothesised that there would be a positive correlation between number of misinformation beliefs and amount of knowledge gathered from Facebook.
+
+## Methodology
+The rank-order (or Spearman) coefficient of correlation between number of misinformation beliefs and amount of knowledge gathered from Facebook was calculated.
+
+## Findings
+```{r}
+misinfo_d <- misinfo_d %>%
+  mutate(
+    know_facebook_coded = know_facebook %>%
+      recode(
+        "Nothing at all" = 0,
+        "Not very much" = 1,
+        "A fair amount" = 2,
+        "A great deal" = 3
+      )
+  )
+
+misinfo_d %>%
+  cor.test(
+    formula = ~ beliefs + know_facebook_coded,
+    data = .,
+    method = 'spearman'
+  )
+```
+
+There was a statistically significant moderate positive correlation between number of misinformation beliefs and amount of knowledge gathered from Facebook, rs(498) = .23, p < .001.
