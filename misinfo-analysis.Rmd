@@ -105,3 +105,33 @@ misinfo_d %>%
 ```
 
 There was a statistically significant moderate positive correlation between number of misinformation beliefs and amount of knowledge gathered from Facebook, rs(498) = .23, p < .001.
+
+# Association of number of misinformation beliefs with age, controlling for amount of knowledge gathered from Facebook
+
+## Correlation between age and amount of knowledge gathered from Facebook
+```{r}
+misinfo_d %>%
+  cor.test(
+    ~ age + know_facebook_coded,
+    data = .,
+    method = 'spearman'
+  )
+```
+
+## Linear model of relationship between age and number of misinformation beliefs
+```{r}
+misinfo_d <- misinfo_d %>%
+  mutate(
+    know_facebook_binary = as.numeric(know_facebook_coded == 3)
+  )
+
+misinfo_d %>%
+  lm(
+    beliefs ~ age + know_facebook_binary,
+    data = .
+  ) %>%
+  summary
+```
+
+Number of misinformation beliefs is predicted by age and amount of knowledge gained from Facebook, F(2, 497) = 22.56, r2 = .08, p < .001. Controlling for amount of knowledge gained from Facebook does not remove the predictive power of age.
+
